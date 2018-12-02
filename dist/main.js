@@ -231,7 +231,7 @@ define(["require", "exports", "./ShaderProgram", "./Camera"], function (require,
         // loseSound.src = "https://dl.dropboxusercontent.com/s/5w1nctadil0s8d8/lose.wav";
         // music.src = "https://dl.dropboxusercontent.com/s/p5wsi6vz5814bii/music.wav";
         eatSound.src = "audio/snake_barell.wav";
-        loseSound.src = "audio/lose.mp3";
+        loseSound.src = "audio/lose.wav";
         music.src = "audio/music.wav";
         draw();
         window.onkeydown = keyboard;
