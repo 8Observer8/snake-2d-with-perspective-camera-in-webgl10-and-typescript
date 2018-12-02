@@ -9,17 +9,35 @@ let sp: ShaderProgram;
 let gl: WebGLRenderingContext;
 
 let interval = 200;
-let snake = [];
-let food = [];
-let snakeDir = { x: 0, y: 1 };
+let snake: { x: number, y: number }[] = [];
+let food = { x: 1000, y: 1000 };
+let obstacles: { x: number, y: number }[] = [];
+let snakeDir: { x: number, y: number };
+
+let eatSound: HTMLAudioElement = new Audio();
+eatSound.volume = 0.3;
+let loseSound: HTMLAudioElement = new Audio();
+loseSound.volume = 0.3;
+let music: HTMLAudioElement = new Audio();
+music.volume = 0.2;
+music.loop = true;
 
 let score = 0;
 let hudContext: CanvasRenderingContext2D;
 
 function drawSnake()
 {
-    sp.Color = [1.0, 1.0, 1.0];
+    sp.Color = [0.635, 0.827, 0.235];
     snake.forEach((element) =>
+    {
+        sp.DrawRect(element.x, element.y, 1, 1);
+    });
+}
+
+function drawObstacles()
+{
+    sp.Color = [0.827, 0.556, 0.235];
+    obstacles.forEach((element) =>
     {
         sp.DrawRect(element.x, element.y, 1, 1);
     });
@@ -28,22 +46,20 @@ function drawSnake()
 function drawFood()
 {
     sp.Color = [0.5, 0.5, 1.0];
-    food.forEach(function (element)
-    {
-        sp.DrawRect(element.x, element.y, 1, 1);
-    });
+    sp.DrawRect(food.x, food.y, 1, 1);
 }
 
 function drawBorders()
 {
+    sp.Color = [0.827, 0.556, 0.235];
     // Top
     sp.DrawRect(-1, sp.fieldHeight, sp.fieldWidth + 2, 1);
     // Bottom
     sp.DrawRect(-1, -1, sp.fieldWidth + 1, 1);
     // Left
-    sp.DrawRect(-1, -1, 1, sp.fieldHeight + 1);
+    sp.DrawRect(-1, -1, 1, sp.fieldHeight + 2);
     // Right
-    sp.DrawRect(sp.fieldWidth, -1, 1, sp.fieldHeight + 1);
+    sp.DrawRect(sp.fieldWidth, -1, 1, sp.fieldHeight + 2);
 }
 
 function getRandomInt(max)
@@ -62,9 +78,85 @@ function draw()
     gl.clear(gl.COLOR_BUFFER_BIT);
 
     drawBorders();
+    drawObstacles();
     drawFood();
     drawSnake();
     drawScore();
+}
+
+function isCollision(newPosX: number, newPosY: number): boolean
+{
+    if (newPosX < 0 || sp.fieldWidth <= newPosX ||
+        newPosY < 0 || sp.fieldHeight <= newPosY)
+    {
+        return true;
+    }
+
+    if (snake.length !== 1)
+    {
+        // Snake with itself
+        for (let i = 1; i < snake.length; i++)
+        {
+            if (newPosX === snake[i].x && newPosY === snake[i].y)
+            {
+                return true;
+            }
+        }
+    }
+
+    if (newPosX === 3 && newPosY === 3)
+    {
+        console.log("he");
+    }
+
+    // Snake with obstacles
+    for (let i = 0; i < obstacles.length; i++)
+    {
+        if (newPosX === obstacles[i].x && newPosY === obstacles[i].y)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function generateFood()
+{
+    let next: boolean;
+    let x: number;
+    let y: number;
+
+    do
+    {
+        x = getRandomInt(sp.fieldWidth);
+        y = getRandomInt(sp.fieldHeight);
+        next = false;
+        for (let i = 0; i < snake.length; i++)
+        {
+            if (x === snake[i].x && y === snake[i].y)
+            {
+                next = true;
+                break;
+            }
+        }
+
+        if (!next)
+        {
+            for (let i = 0; i < obstacles.length; i++)
+            {
+                if (x === obstacles[i].x && y === obstacles[i].y)
+                {
+                    next = true;
+                    break;
+                }
+            }
+        }
+
+    } while (next);
+
+    food.x = x;
+    food.y = y;
 }
 
 function update()
@@ -72,33 +164,26 @@ function update()
     let newPosX = snake[0].x + snakeDir.x;
     let newPosY = snake[0].y + snakeDir.y;
 
-    snake.unshift({ x: newPosX, y: newPosY });
-    snake.pop();
-
-    let headX = snake[0].x;
-    let headY = snake[0].y;
-
-    food.forEach((f, index) =>
+    if (!isCollision(newPosX, newPosY))
     {
-        if (headX === f.x && headY === f.y)
+        snake.unshift({ x: newPosX, y: newPosY });
+        snake.pop();
+
+        let headX = snake[0].x;
+        let headY = snake[0].y;
+
+        if (headX === food.x && headY === food.y)
         {
-            snake.push({ x: f.x, y: f.y });
-            food.splice(index, 1);
+            snake.push({ x: food.x, y: food.y });
             score++;
+            generateFood();
+            eatSound.play();
         }
-    });
-
-    /*
-        This value is between 0 and 20. Then we check if the
-        value is 0 (which happens with a 5% chance because 100 divided by 20 is 5)
-    */
-    let r = getRandomInt(20);   // Spawn food with 5% chance
-    if (r === 0)
+    }
+    else
     {
-        let x = getRandomInt(sp.fieldWidth);
-        let y = getRandomInt(sp.fieldHeight);
-        console.log(`New food: (${x}, ${y})`);
-        food.push({ x: x, y: y });
+        startGame();
+        loseSound.play();
     }
 
     draw();
@@ -111,23 +196,35 @@ function keyboard(keyEvent: KeyboardEvent)
     {
         case "w":
         case "ArrowUp":
-            snakeDir.x = 0;
-            snakeDir.y = 1;
+            if (snakeDir.y !== -1)
+            {
+                snakeDir.x = 0;
+                snakeDir.y = 1;
+            }
             break;
         case "a":
         case "ArrowLeft":
-            snakeDir.x = -1;
-            snakeDir.y = 0;
+            if (snakeDir.x !== 1)
+            {
+                snakeDir.x = -1;
+                snakeDir.y = 0;
+            }
             break;
         case "s":
         case "ArrowDown":
-            snakeDir.x = 0;
-            snakeDir.y = -1;
+            if (snakeDir.y !== 1)
+            {
+                snakeDir.x = 0;
+                snakeDir.y = -1;
+            }
             break;
         case "d":
         case "ArrowRight":
-            snakeDir.x = 1;
-            snakeDir.y = 0;
+            if (snakeDir.x !== -1)
+            {
+                snakeDir.x = 1;
+                snakeDir.y = 0;
+            }
             break;
         default:
             console.log("This key is not used.");
@@ -135,10 +232,22 @@ function keyboard(keyEvent: KeyboardEvent)
     }
 }
 
-function onStartGame(button: HTMLButtonElement)
+function startGame()
 {
-    update();
+    snakeDir = { x: 0, y: 1 };
+    snake = [];
+    snake.push({ x: sp.fieldWidth / 2, y: 1 });
+    generateFood();
+    score = 0;
+}
+
+function onStartGameButtonClick(button: HTMLButtonElement)
+{
+    startGame();
     button.style.visibility = "hidden";
+    createObstacles();
+    music.play();
+    update();
 }
 
 function setButtonOnCenter(button: HTMLButtonElement, canvas: HTMLCanvasElement)
@@ -160,6 +269,16 @@ function setHudOverRenderCanvas(renderCanvas: HTMLCanvasElement, hudCanvas: HTML
     hudCanvas.height = 256;
     hudCanvas.style.left = renderCanvas.offsetLeft.toString() + 'px';
     hudCanvas.style.top = renderCanvas.offsetTop.toString() + 'px';
+}
+
+function createObstacles()
+{
+    obstacles.push({ x: 2, y: 3 });
+    obstacles.push({ x: 3, y: 3 });
+
+    obstacles.push({ x: 7, y: 7 });
+    obstacles.push({ x: 7, y: 8 });
+    obstacles.push({ x: 7, y: 9 });
 }
 
 function main()
@@ -190,12 +309,14 @@ function main()
     let yCameraPos = sp.fieldHeight / 2 - 4;
     let camera = new Camera(gl, sp.program, [xCameraPos, yCameraPos, 12], [xTarget, yTarget, 0]);
 
-    snake.push({ x: sp.fieldWidth / 2, y: 1 });
-
     gl.clearColor(0.0, 0.1, 0.1, 1.0);
+
+    eatSound.src = "https://dl.dropboxusercontent.com/s/m2nnha5awgw4az7/snake_barell.wav";
+    loseSound.src = "https://dl.dropboxusercontent.com/s/5w1nctadil0s8d8/lose.wav";
+    music.src = "https://dl.dropboxusercontent.com/s/p5wsi6vz5814bii/music.wav";
 
     draw();
     window.onkeydown = keyboard;
-    btnStart.onclick = () => { onStartGame(btnStart) };
+    btnStart.onclick = () => { onStartGameButtonClick(btnStart) };
 };
 main();
