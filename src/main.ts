@@ -311,9 +311,12 @@ function main()
 
     gl.clearColor(0.0, 0.1, 0.1, 1.0);
 
-    eatSound.src = "https://dl.dropboxusercontent.com/s/m2nnha5awgw4az7/snake_barell.wav";
-    loseSound.src = "https://dl.dropboxusercontent.com/s/5w1nctadil0s8d8/lose.wav";
-    music.src = "https://dl.dropboxusercontent.com/s/p5wsi6vz5814bii/music.wav";
+    // eatSound.src = "https://dl.dropboxusercontent.com/s/m2nnha5awgw4az7/snake_barell.wav";
+    // loseSound.src = "https://dl.dropboxusercontent.com/s/5w1nctadil0s8d8/lose.wav";
+    // music.src = "https://dl.dropboxusercontent.com/s/p5wsi6vz5814bii/music.wav";
+    eatSound.src = "audio/snake_barell.wav";
+    loseSound.src = "audio/lose.mp3";
+    music.src = "audio/music.wav";
 
     draw();
     window.onkeydown = keyboard;
