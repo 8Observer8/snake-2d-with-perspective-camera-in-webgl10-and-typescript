@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "module": "amd",
+        "target": "es5",
+        "noImplicitAny": false,
+        "sourceMap": true,
+        "outDir": "dist"
+    },
+    "include": [
+        "src/**/*"
+    ],
+    "exclude": [
+        "node_modules"
+    ]
+}

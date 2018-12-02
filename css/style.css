@@ -1,0 +1,18 @@
+#startGame {
+    position: absolute;
+    top: 125px;
+    left: 100px;
+    width: 100px;
+    z-index: 10;
+}
+
+#renderCanvas {
+    width: 256px;
+    height: 256px;
+}
+
+#hudCanvas {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+}
