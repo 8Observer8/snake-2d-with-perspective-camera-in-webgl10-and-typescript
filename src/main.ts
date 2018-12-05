@@ -104,11 +104,6 @@ function isCollision(newPosX: number, newPosY: number): boolean
         }
     }
 
-    if (newPosX === 3 && newPosY === 3)
-    {
-        console.log("he");
-    }
-
     // Snake with obstacles
     for (let i = 0; i < obstacles.length; i++)
     {
