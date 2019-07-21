@@ -187,6 +187,8 @@ function update()
 
 function keyboard(keyEvent: KeyboardEvent)
 {
+    let oldDir = {x:snakeDir.x,y:snakeDir.y};
+    
     switch (keyEvent.key)
     {
         case "w":
@@ -224,6 +226,14 @@ function keyboard(keyEvent: KeyboardEvent)
         default:
             console.log("This key is not used.");
             break;
+    }
+    
+    let newPosX = snake[0].x + snakeDir.x;
+    let newPosY = snake[0].y + snakeDir.y;
+    
+    if (isCollision(newPosX,newPosY)){
+      snakeDir.x = oldDir.x;
+      snakeDir.y = oldDir.y;
     }
 }
 
