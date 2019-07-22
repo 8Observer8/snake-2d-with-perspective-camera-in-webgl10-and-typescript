@@ -3,7 +3,8 @@ Snake 2D With Perspective Camera in WebGL 1.0, TypeScript, glMatrix, AMD and Req
 
 - download or clone
 - npm install
-- tsc
+- npm run build-debug
 - http-server
+- open in browser: localhost:8080
 
 Playground: https://next.plnkr.co/edit/7gjdZi2GNHZvtHQEMc4Y?preview

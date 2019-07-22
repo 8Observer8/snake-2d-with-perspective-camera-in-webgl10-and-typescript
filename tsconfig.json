@@ -2,14 +2,10 @@
     "compilerOptions": {
         "module": "amd",
         "target": "es5",
-        "noImplicitAny": false,
         "sourceMap": true,
-        "outDir": "dist"
+        "outDir": "public/js"
     },
     "include": [
-        "src/**/*"
-    ],
-    "exclude": [
-        "node_modules"
+        "src/**/*.ts"
     ]
 }

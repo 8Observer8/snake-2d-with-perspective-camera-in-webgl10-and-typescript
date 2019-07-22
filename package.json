@@ -4,7 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build-debug": "tsc -p tsconfig.debug.json",
+    "compile-release": "tsc -p tsconfig.release.json",
+    "bundle-release": "browserify public/js/main.js -o public/js/bundle.js",
+    "minify-release": "uglifyjs public/js/bundle.js -o public/js/bundle.min.js",
+    "build-release": "npm run compile-release && npm run bundle-release && npm run minify-release"
   },
   "keywords": [],
   "author": "",
@@ -12,5 +17,8 @@
   "devDependencies": {
     "@types/gl-matrix": "^2.4.5",
     "@types/requirejs": "^2.1.31"
+  },
+  "dependencies": {
+    "gl-matrix": "^3.0.0"
   }
 }
